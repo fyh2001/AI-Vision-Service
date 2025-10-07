@@ -1,0 +1,20 @@
+[project]
+name = "ai-vision-service"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "accelerate>=1.10.1",
+    "av==15.1.0",
+    "diffusers>=0.35.1",
+    "fastapi>=0.118.0",
+    "huggingface-hub[cli]>=0.35.3",
+    "protobuf>=6.32.1",
+    "sentencepiece>=0.2.1",
+    "torch==2.6.0",
+    "torchvision>=0.21.0",
+    "qwen-vl-utils[decord]==0.0.8",
+    "transformers==4.49.0",
+    "uvicorn>=0.37.0",
+]
