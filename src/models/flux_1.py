@@ -1,5 +1,5 @@
 import torch
-
+from torch.profiler import profile, record_function, ProfilerActivity
 from dataclasses import dataclass
 from diffusers import FluxPipeline
 from src.models.base import BaseModel
@@ -53,17 +53,25 @@ class FluxModel(BaseModel):
         num_inference_steps: int = 50,
         max_sequence_length: int = 512,
     ) -> list[TextToImageOutput]:
-        prompts = [input.prompt for input in inputs]
-        outputs = self.model(
-            prompts,
-            height=height,
-            width=width,
-            guidance_scale=guidance_scale,
-            num_inference_steps=num_inference_steps,
-            max_sequence_length=max_sequence_length,
-            generator=torch.Generator(device=self.device),
-        )
-        return [TextToImageOutput(image=output.images[i]) for i in range(len(outputs))]
+        with profile(
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,
+        ) as profiler:
+            with record_function("model_inference"):
+                prompts = [input.prompt for input in inputs]
+                output = self.model(
+                    prompts,
+                    height=height,
+                    width=width,
+                    guidance_scale=guidance_scale,
+                    num_inference_steps=num_inference_steps,
+                    max_sequence_length=max_sequence_length,
+                    generator=torch.Generator(device=self.device),
+                )
+        profiler.export_chrome_trace("perfetto_trace.json")
+        return [TextToImageOutput(image=image) for image in output.images]
 
 
 if __name__ == "__main__":
