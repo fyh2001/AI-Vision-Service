@@ -22,6 +22,7 @@ class FluxModel(BaseModel):
         self.model = FluxPipeline.from_pretrained(model_name, torch_dtype=torch.float16)
         self.model.to(self.device)
 
+    @torch.inference_mode()
     def infer(
         self,
         input: TextToImageInput,
@@ -41,6 +42,28 @@ class FluxModel(BaseModel):
             generator=torch.Generator(device=self.device),
         )
         return TextToImageOutput(image=output.images[0])
+
+    @torch.inference_mode()
+    def batch_infer(
+        self,
+        inputs: list[TextToImageInput],
+        height: int = 1024,
+        width: int = 1024,
+        guidance_scale: float = 3.5,
+        num_inference_steps: int = 50,
+        max_sequence_length: int = 512,
+    ) -> list[TextToImageOutput]:
+        prompts = [input.prompt for input in inputs]
+        outputs = self.model(
+            prompts,
+            height=height,
+            width=width,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            max_sequence_length=max_sequence_length,
+            generator=torch.Generator(device=self.device),
+        )
+        return [TextToImageOutput(image=output.images[i]) for i in range(len(outputs))]
 
 
 if __name__ == "__main__":
