@@ -1,6 +1,6 @@
 # Torch Compile
 
-### 使用 torch compile 加速推理:
+## 使用 torch compile 加速推理:
 
 ```Python
 import torch
@@ -263,3 +263,109 @@ Batch inference time: 54.6904 seconds
 100%|██████████████████████████████████████████████| 50/50 [00:42<00:00,  1.19it/s]
 Batch inference time: 43.5046 seconds
 ```
+
+### 更多尝试
+
+对同一个 case 我做了以下尝试，但是都没啥实质性的提升，记录一下。
+
+- 开启 GPU Graphs
+
+  ```Python
+  import torch
+
+  torch._inductor.config.triton.cudagraphs = enable_cuda_graph
+  ```
+
+- 调整 `compile mode = "reduce-overhead"`
+
+- 将 model 内部的 `vae`, `text_encoder`, `text_encoder_2` 都 compile
+  ```Python
+  self.model.vae = torch.compile(self.model.vae, mode=compile_mode, fullgraph=True)
+  self.model.text_encoder = torch.compile(self.model.text_encoder, mode=compile_mode, fullgraph=True)
+  self.model.text_encoder_2 = torch.compile(self.model.text_encoder_2, mode=compile_mode, fullgraph=True)
+  ```
+- warmup 次数增多至 5 次
+  ```Python
+  with torch.inference_mode():
+      print("[FluxModel] Running warmup inference for compile optimization...")
+      for _ in range(5):
+          _ = self.model(
+              warmup_prompt,
+              height=512,
+              width=512,
+              guidance_scale=3.5,
+              num_inference_steps=50,
+              max_sequence_length=512,
+              generator=torch.Generator(device=self.device),
+          )
+      print("[FluxModel] Warmup complete — compiled graph ready.")
+  ```
+
+## torch compile 与 torch profiler
+
+我想对比一下 **torch no compile** 和 **torch compiled** 的 **profiler** 差异，于是
+
+```Python
+@torch.inference_mode()
+    def batch_infer(
+        self,
+        inputs: list[TextToImageInput],
+        height: int = 512,
+        width: int = 512,
+        guidance_scale: float = 3.5,
+        num_inference_steps: int = 50,
+        max_sequence_length: int = 512,
+        enable_profiler: bool = False,
+    ) -> list[TextToImageOutput]:
+        if enable_profiler:
+            prof_context = profile(
+                activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA],
+                record_shapes=False,
+                profile_memory=True,
+                with_stack=True,
+            )
+        else:
+            prof_context = contextlib.nullcontext()
+
+        with prof_context as profiler:
+            prompts = [input.prompt for input in inputs]
+            start_time = time()
+            output = self.model(
+                prompts,
+                height=height,
+                width=width,
+                guidance_scale=guidance_scale,
+                num_inference_steps=num_inference_steps,
+                max_sequence_length=max_sequence_length,
+                generator=torch.Generator(device=self.device),
+            )
+            end_time = time()
+            print(f"Batch inference time: {end_time - start_time:.4f} seconds")
+
+        if enable_profiler:
+            profiler.export_chrome_trace("perfetto_trace.json")
+
+        return [TextToImageOutput(image=image) for image in output.images]
+```
+
+No torch compile:
+<img src="../public/no_torch_compile.png">
+
+torch compiled:
+<img src="../public/torch_compiled.png">
+
+简单观察可以发现，**compile** 前的有不少多个连续的小 `Kernel`，而 **compile** 后，这些小 `Kernel` 被融合成了少数几个大的 **`复合 Kernel`**。可以见得，这就是 `torch.compile` 对算子的核心优化。
+
+看了一些资料，结合我个人的理解，**compile** 能够加速推理主要是因为：
+
+- 每个 `Kernel` 启动都有**固定开销**，比如 CPU 向 GPU 传递参数、GPU 调度线程块等操作，这些开销都会 "分摊"到每个小算子上，导致整体利用率低。
+
+- 在 `No torch compile` 图中，前半段有一大片花花绿绿的**短小密集**的`Kernel`，那么在执行的时候，GPU 会在 "启动 Kernel -> 计算 -> 等待下一个 Kernel" 之间频繁切换，这样空闲时间占比就高了。
+
+- `torch.compile` 会静态分析计算图，会将"可以连续执行、数据依赖紧密"的多个小 Kernel 融合成一个复合 Kernel，然后编译成一个大的 GPU Kernel。
+
+  - 那原本需要 10 次 Kernel 启动的操作，融合后可能就只需要 1 次，省去了 9 次启动的固定开销！
+
+  - 而且融合后的大 Kernel 能够让 GPU 计算单元"连续工作"（我理解是一些依赖中间结果的操作，会将中间结果在寄存器内直接传递，不再需要读写全局内存）
+
+  - 所以在 `torch compiled` 图中，不再有像`No torch compile`图里一大片连续的花花绿绿的 Kernel 了，看起来也舒服很多！
