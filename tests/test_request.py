@@ -57,17 +57,15 @@ async def test_http_image2text(
             return
         data = await resp.json()
         text = data.get("text", "")
-        print(
-            f"[HTTP {idx}] ✅ {end_time - start_time:.2f}s | Response: {text[:60]}..."
-        )
+        print(f"[HTTP {idx}] ✅ {end_time - start_time:.2f}s | Response: {text}...")
 
 
 async def main(prompts: list[str]):
     timeout = aiohttp.ClientTimeout(
-        total=600,  # 总超时 10 分钟
+        total=1200,  # 总超时 20 分钟
         connect=10,  # 连接超时 10s
         sock_connect=10,  # 套接字连接超时 10s
-        sock_read=600,  # 读取超时 10 分钟
+        sock_read=1200,  # 读取超时 20 分钟
     )
     if MODE == "text2image":
         async with aiohttp.ClientSession(timeout=timeout) as session:

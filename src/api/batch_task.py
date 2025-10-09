@@ -14,7 +14,7 @@ from models.qwen2_5_vl import ImageToTextInput
 
 MODEL_TYPE = os.getenv("MODEL_TYPE", "text2image").lower()
 TEXT2IMAGE_BATCH_SIZE = int(os.getenv("TEXT2IMAGE_BATCH_SIZE", 5))
-IMAGE2TEXT_BATCH_SIZE = int(os.getenv("IMAGE2TEXT_BATCH_SIZE", 2))
+IMAGE2TEXT_BATCH_SIZE = int(os.getenv("IMAGE2TEXT_BATCH_SIZE", 5))
 # BATCH_TIMEOUT = int(os.getenv("BATCH_TIMEOUT", 0.3))
 BATCH_TIMEOUT = 0.3
 
@@ -59,6 +59,7 @@ async def batch_worker():
         except Exception as e:
             for fut in futs:
                 fut.set_exception(e)
+                print(f"[Worker] Error: {e}")
         finally:
             for task in batch:
                 queue.task_done()

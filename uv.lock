@@ -40,9 +40,11 @@ dependencies = [
     { name = "protobuf" },
     { name = "qwen-vl-utils", extra = ["decord"] },
     { name = "sentencepiece" },
+    { name = "setuptools" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "transformers" },
+    { name = "triton" },
     { name = "uvicorn" },
 ]
 
@@ -57,9 +59,11 @@ requires-dist = [
     { name = "protobuf", specifier = ">=6.32.1" },
     { name = "qwen-vl-utils", extras = ["decord"], specifier = "==0.0.8" },
     { name = "sentencepiece", specifier = ">=0.2.1" },
+    { name = "setuptools", specifier = ">=80.9.0" },
     { name = "torch", specifier = "==2.6.0" },
     { name = "torchvision", specifier = ">=0.21.0" },
     { name = "transformers", specifier = "==4.49.0" },
+    { name = "triton", specifier = ">=3.2.0" },
     { name = "uvicorn", specifier = ">=0.37.0" },
 ]
 
