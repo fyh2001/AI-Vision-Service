@@ -354,7 +354,7 @@ No torch compile:
 torch compiled:
 <img src="../public/torch_compiled.png">
 
-简单观察可以发现，**compile** 前的有不少多个连续的小 `Kernel`，而 **compile** 后，这些小 `Kernel` 被融合成了少数几个大的 **`复合 Kernel`**。可以见得，这就是 `torch.compile` 对算子的核心优化。
+简单观察可以发现，**compile** 前的有不少多个连续的 **小 Kernel**，而 **compile** 后，这些 **小 Kernel** 被融合成了少数几个大的 **`复合 Kernel`**。可以见得，这就是 `torch.compile` 对算子的核心优化。
 
 看了一些资料，结合我个人的理解，**compile** 能够加速推理主要是因为：
 
