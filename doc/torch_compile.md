@@ -37,8 +37,8 @@ AttributeError: 'FluxPipeline' object has no attribute 'unet'
 
 原因是 `FluxPipeline` 是 **Black Forest Labs 的私有实现** ，内部结构不同。于是我 print 了`self.model`
 
-```Json
-FluxPipeline {
+```Python
+FluxPipeline = {
   "_class_name": "FluxPipeline",
   "_diffusers_version": "0.35.1",
   "_name_or_path": "black-forest-labs/FLUX.1-dev",
