@@ -92,11 +92,11 @@ with record_function("Qwen2_5_VLVisionSdpaAttention:forward:mask"):
            attention_mask[..., cu_seqlens[i - 1] : cu_seqlens[i], cu_seqlens[i - 1] : cu_seqlens[i]] = True
 ```
 
-结果不负所望，大面积 `D2H` 确实是这一块代码导致的
+结果不失所望，大面积 `D2H` 确实是这一块代码导致的
 
 <img src="../../public/qwen2_5_vl_torch_compiled_d2h_mark.png">
 
-那理论上来说，我可以在 CPU 上直接把 `attention_mask` 计算完再 `.to(devoce)`，可以减少反复多次的 `D2H`。
+那理论上来说，我可以在 CPU 上直接把 `attention_mask` 计算完再 `.to(device)`，可以减少反复多次的 `D2H`。
 
 ```Python
 cu_seqlens_cpu = cu_seqlens.cpu().tolist()
