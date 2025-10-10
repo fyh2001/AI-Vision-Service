@@ -33,7 +33,10 @@ class Qwen2_5_VLModel(BaseModel):
     ):
         super().__init__()
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-            model_name, torch_dtype=torch.float16, device_map="auto"
+            model_name,
+            torch_dtype=torch.float16,
+            device_map="auto",
+            attn_implementation="flash_attention_2",
         )
         self.processor = AutoProcessor.from_pretrained(model_name, use_fast=True)
         self.model.to(self.device)
@@ -197,8 +200,8 @@ if __name__ == "__main__":
             ImageToTextInput(images=[image], prompt="Describe the image")
             for image in images
         ],
-        enable_profiler=False,
-        profiler_output_file="qwen2_5_vl_trace_with_compile_5.json",
+        enable_profiler=True,
+        profiler_output_file="qwen2_5_vl_trace_with_compile_flash_attn.json",
     )
 
     for output in outputs:

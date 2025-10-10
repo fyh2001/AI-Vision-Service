@@ -20,4 +20,11 @@ dependencies = [
     "aiohttp>=3.13.0",
     "triton>=3.2.0",
     "setuptools>=80.9.0",
+    "flash-attn",
 ]
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch"]
+
+[tool.uv.sources]
+flash-attn = { url = "https://github.com/Dao-AILab/flash-attention/releases/download/v2.7.1.post1/flash_attn-2.7.1.post1+cu12torch2.6cxx11abiFALSE-cp310-cp310-linux_x86_64.whl" }
