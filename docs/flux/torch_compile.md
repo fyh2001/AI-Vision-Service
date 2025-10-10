@@ -349,10 +349,10 @@ Batch inference time: 43.5046 seconds
 ```
 
 No torch compile:
-<img src="../public/no_torch_compile.png">
+<img src="../../public/flux_no_torch_compile.png">
 
 torch compiled:
-<img src="../public/torch_compiled.png">
+<img src="../../public/flux_torch_compiled.png">
 
 简单观察可以发现，**compile** 前的有不少多个连续的 **小 Kernel**，而 **compile** 后，这些 **小 Kernel** 被融合成了少数几个大的 **`复合 Kernel`**。可以见得，这就是 `torch.compile` 对算子的核心优化。
 

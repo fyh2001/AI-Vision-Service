@@ -1,5 +1,5 @@
 import torch
-from torch.profiler import profile, record_function, ProfilerActivity
+from torch.profiler import profile, ProfilerActivity
 from dataclasses import dataclass
 from diffusers import FluxPipeline
 from src.models.base import BaseModel
