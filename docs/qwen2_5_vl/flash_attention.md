@@ -30,7 +30,7 @@ batch_infer time: 3.28806471824646
 
 - `Profill` duration: 7s 171ms
 
-- `Decode` duration: 4s 012ms
+- `Decode` duration: 4s 368ms
 
 <img src="../../public/qwen2_5_vl_no_flash_attn_full.png">
 
