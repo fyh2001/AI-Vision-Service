@@ -1,5 +1,9 @@
 # AI-Vision-Service
 
+<p align="center">
+🌐 Language Switch | <a href="./README_CN.md">中文文档</a> / <a href="./README.md">English Documentation</a>
+</p>
+
 A practical project focused on visual language model deployment optimization and inference acceleration, integrating mainstream multimodal models (Flux, Qwen2.5-VL) with efficient inference through technologies like `torch.compile` 、`Flash Attention` and so on.
 
 ## Project Features
@@ -14,7 +18,7 @@ A practical project focused on visual language model deployment optimization and
 
   - Optimizes D2H (device-to-host) data transmission bottlenecks
 
-- **Batch Processing **Support\*\*: Provides both single-task and batch processing interfaces to adapt to different scenario requirements
+- **Batch Processing Support**: Provides both single-task and batch processing interfaces to adapt to different scenario requirements
 
 - **Performance Observability**: Integrates PyTorch Profiler for performance analysis and bottleneck identification
 
@@ -79,7 +83,7 @@ curl -X POST http://localhost:8000/infer \
 
 ## Optimization Insights
 
-Below are the optimization strategies and analytical methods I documented throughout my technical practice. For a step-by-step understanding of the optimization process, I recommend reading them in this order:
+Below are the optimization strategies and analytical methods I documented throughout my technical practice. For a step-by-step understanding of the optimization process, I recommend reading them in this order: `/AI-Vision-Service/docs`
 
 1. [Flux Model Optimized with `torch.compile`](./docs/flux/torch_compile.md)
 

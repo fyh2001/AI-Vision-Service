@@ -1,5 +1,9 @@
 # AI-Vision-Service
 
+<p align="center">
+🌐 Language Switch | <a href="./README_CN.md">中文文档</a> / <a href="./README.md">English Documentation</a>
+</p>
+
 一个专注于视觉语言模型部署优化与推理加速的实践项目，集成了主流多模态模型（Flux、Qwen2.5-VL），并通过 `torch.compile`、`Flash Attention` 等技术实现高效推理。
 
 ## 项目特点
@@ -79,7 +83,7 @@ curl -X POST http://localhost:8000/infer \
 
 ## 优化心得
 
-以下是我在技术实践过程中记录的优化方案与分析方法。若想循序渐进理解完整的优化流程，建议按以下顺序阅读：
+以下是我在技术实践过程中记录的优化方案与分析方法。若想循序渐进理解完整的优化流程，建议按以下顺序阅读：`/AI-Vision-Service/docs`
 
 1. [基于 `torch.compile` 的 Flux 模型优化](./docs/flux/torch_compile.md)  
    — 介绍如何为 Flux 文本生成图像模型调优 `torch.compile` 参数（如 `mode="reduce-overhead"`），并附推理速度提升约 20% 的测试结果。
