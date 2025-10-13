@@ -1,4 +1,4 @@
-# AI-Vision-Service
+<h1 align="center">AI-Vision-Service </h1>
 
 <p align="center">
 🌐 Language Switch | <a href="./README_CN.md">中文文档</a> / <a href="./README.md">English Documentation</a>
