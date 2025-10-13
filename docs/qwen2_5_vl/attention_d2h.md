@@ -115,13 +115,13 @@ attention_mask = attention_mask_cpu.to(q.device)
 在我满心欢喜，觉得这直接拿下的时候，结果让我傻眼了！？
 
 ```bash
-No torch compile
+# No torch compile
 batch_infer time: 9.930200099945068
 
-D2H 修改前
+# D2H 修改前
 batch_infer time: 8.901242733001709
 
-D2H 修改后
+# D2H 修改后
 batch_infer time: 9.848342657089233
 ```
 
@@ -146,22 +146,20 @@ for start, end in zip(cu_seqlens_cpu, cu_seqlens_cpu[1:]):
 从执行耗时来看，提升也是很明显的。
 
 ```bash
-No torch compile
+# No torch compile
 batch_infer time: 9.930200099945068
 
-D2H 修改前
+# D2H 修改前
 batch_infer time: 8.901242733001709
 
-D2H 修改后（第一次）
+# D2H 修改后（第一次）
 batch_infer time: 9.848342657089233
 
-D2H 修改后（第二次）
+# D2H 修改后（第二次）
 batch_infer time: 8.560559511184692
 ```
 
 不过再看图像，会发现还有一大片绿色的块，其实是我代码中 `attention_mask[..., start:end, start:end] = True` 这一行的底层实现。
-
-这个还能不能优化呢？GPT 老师推荐是通过 FlashAttention 进行优化。
 
 ```C++
 void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::FillFunctor<bool> >(at::TensorIteratorBase&, at::native::FillFunctor<bool> const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::FillFunctor<bool> >(at::TensorIteratorBase&, at::native::FillFunctor<bool> const&)::{lambda(int)#1})

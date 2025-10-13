@@ -13,7 +13,7 @@ class FluxModel(BaseModel):
         self,
         model_name: str = "black-forest-labs/FLUX.1-dev",
         compile_model: bool = True,
-        compile_mode: str = "reduce-overhead",
+        compile_mode: str = "default",
     ):
         super().__init__()
         self.model = FluxPipeline.from_pretrained(model_name, torch_dtype=torch.float16)
