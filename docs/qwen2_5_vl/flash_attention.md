@@ -28,7 +28,7 @@ batch_infer time: 3.28806471824646
 
 **No Flash Attention(Duration: 11s 887s)**
 
-- `Profill` duration: 7s 171ms
+- `Prefill` duration: 7s 171ms
 
 - `Decode` duration: 4s 368ms
 
@@ -36,37 +36,37 @@ batch_infer time: 3.28806471824646
 
 **Flash Attention(Duration: 5s 450ms)**
 
-- `Profill` duration: 568ms 340µs
+- `Prefill` duration: 568ms 340µs
 
 - `Decode` duration: 4s 012ms
 
 <img src="../../public/qwen2_5_vl_flash_attn_full.png">
 
-从两个图像都可以看出，Qwen2.5-VL 模型推理包含两个阶段，分别是 `Profill` 和 `Decode`。接下来我会分别从这两个阶段进行分析。
+从两个图像都可以看出，Qwen2.5-VL 模型推理包含两个阶段，分别是 `Prefill` 和 `Decode`。接下来我会分别从这两个阶段进行分析。
 
-## Profill
+## Prefill
 
-从图像和数据可见，开启 `flash-attn` 后的 Profill 耗时直接从 **7s 171ms -> 568ms 340µs，提升接近 12.6x**，简直就是魔法！！具体看一下 `Profill` 中每次 `forward` 需要的时间开销
+从图像和数据可见，开启 `flash-attn` 后的 Prefill 耗时直接从 **7s 171ms -> 568ms 340µs，提升接近 12.6x**，简直就是魔法！！具体看一下 `Prefill` 中每次 `forward` 需要的时间开销
 
 **No Flash Attention(Duration: 214ms 319µs)**
 
-<img src="../../public/qwen2_5_vl_no_flash_attn_profill_forward.png">
+<img src="../../public/qwen2_5_vl_no_flash_attn_prefill_forward.png">
 
 **Flash Attention(Duration: 8ms 801µs)**
 
-<img src="../../public/qwen2_5_vl_flash_attn_profill_forward.png">
+<img src="../../public/qwen2_5_vl_flash_attn_prefill_forward.png">
 
 可见在 `forward` 中就有 **20 多倍的提升**。这里我找到了 `flash-attn` 的主要优化部分：
 
 **No Flash Attention**
 
-<img src="../../public/qwen2_5_vl_no_flash_attn_profill_forward_apply_rotary_pos_emb.png">
-<img src="../../public/qwen2_5_vl_no_flash_attn_profill_forward_attention.png">
+<img src="../../public/qwen2_5_vl_no_flash_attn_prefill_forward_apply_rotary_pos_emb.png">
+<img src="../../public/qwen2_5_vl_no_flash_attn_prefill_forward_attention.png">
 
 **Flash Attention**
 
-<img src="../../public/qwen2_5_vl_flash_attn_profill_forward_apply_rotary_pos_emb.png">
-<img src="../../public/qwen2_5_vl_flash_attn_profill_forward_attention.png">
+<img src="../../public/qwen2_5_vl_flash_attn_prefill_forward_apply_rotary_pos_emb.png">
+<img src="../../public/qwen2_5_vl_flash_attn_prefill_forward_attention.png">
 
 很明显可以发现，`flash-attn` 合并了多个小 Kernel，**把多个能合并的矩阵计算都放到一个 Kernel 中实现**，**减少了访存开销和 kernel launch overhead。** 这其实也是 `Flash Attention` 的**核心思想**。
 
